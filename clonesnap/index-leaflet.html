@@ -1,0 +1,725 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CloneSnap - 地图社交 (Leaflet版)</title>
+    <link rel="stylesheet" href="styles.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <!-- Leaflet地图 -->
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.7.1/dist/leaflet.css" />
+    <script src="https://unpkg.com/leaflet@1.7.1/dist/leaflet.js"></script>
+</head>
+<body>
+    <!-- 主要内容区域 -->
+    <div class="app-container">
+        <!-- 顶部状态栏 -->
+        <div class="status-bar">
+            <div class="status-left">
+                <span class="time">12:34</span>
+            </div>
+            <div class="status-right">
+                <i class="fas fa-wifi"></i>
+                <i class="fas fa-battery-three-quarters"></i>
+            </div>
+        </div>
+
+        <!-- 主内容 -->
+        <div class="content" id="content">
+            <!-- 地图页面 -->
+            <div class="page active" id="map-page">
+                <div class="page-header">
+                    <h2>附近的朋友</h2>
+                    <button class="settings-btn">
+                        <i class="fas fa-cog"></i>
+                    </button>
+                </div>
+                <div class="map-container">
+                    <div class="map" id="leafletMap">
+                        <!-- Leaflet地图将在这里加载 -->
+                    </div>
+                    <div class="map-controls">
+                        <button class="location-btn" onclick="getCurrentLocation()">
+                            <i class="fas fa-crosshairs"></i>
+                        </button>
+                        <button class="refresh-btn" onclick="refreshNearbyUsers()">
+                            <i class="fas fa-sync-alt"></i>
+                        </button>
+                    </div>
+                </div>
+                <div class="nearby-users">
+                    <h3>附近的人</h3>
+                    <div class="user-list">
+                        <!-- 用户列表将通过JavaScript动态生成 -->
+                    </div>
+                </div>
+            </div>
+
+            <!-- 聊天页面 -->
+            <div class="page" id="chat-page">
+                <div class="page-header">
+                    <h2>聊天</h2>
+                    <button class="search-btn">
+                        <i class="fas fa-search"></i>
+                    </button>
+                </div>
+                <div class="chat-list">
+                    <div class="chat-item" onclick="openChat('user1')">
+                        <div class="avatar">
+                            <img src="https://ui-avatars.com/api/?name=小明&background=FF6B6B&color=fff" alt="小明">
+                            <div class="online-indicator"></div>
+                        </div>
+                        <div class="chat-info">
+                            <h4>小明</h4>
+                            <p class="last-message">你好，在附近看到你了 👋</p>
+                        </div>
+                        <div class="chat-meta">
+                            <span class="time">刚刚</span>
+                            <div class="unread-badge">2</div>
+                        </div>
+                    </div>
+                    <div class="chat-item" onclick="openChat('user2')">
+                        <div class="avatar">
+                            <img src="https://ui-avatars.com/api/?name=小红&background=4ECDC4&color=fff" alt="小红">
+                        </div>
+                        <div class="chat-info">
+                            <h4>小红</h4>
+                            <p class="last-message">今天天气真好呢</p>
+                        </div>
+                        <div class="chat-meta">
+                            <span class="time">5分钟前</span>
+                        </div>
+                    </div>
+                    <div class="chat-item" onclick="openChat('user3')">
+                        <div class="avatar">
+                            <img src="https://ui-avatars.com/api/?name=大伟&background=45B7D1&color=fff" alt="大伟">
+                        </div>
+                        <div class="chat-info">
+                            <h4>大伟</h4>
+                            <p class="last-message">有空一起吃饭吗？</p>
+                        </div>
+                        <div class="chat-meta">
+                            <span class="time">昨天</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 相机页面 -->
+            <div class="page" id="camera-page">
+                <div class="camera-container">
+                    <!-- 实时相机预览 -->
+                    <div class="camera-preview">
+                        <video id="cameraVideo" autoplay muted playsinline></video>
+                        <canvas id="photoCanvas" style="display: none;"></canvas>
+                        
+                        <!-- 相机权限请求界面 -->
+                        <div class="camera-permission" id="cameraPermission">
+                            <i class="fas fa-camera"></i>
+                            <h3>需要相机权限</h3>
+                            <p>请允许访问您的相机以使用拍照和录视频功能</p>
+                            <button class="enable-camera-btn" onclick="requestCameraPermission()">
+                                启用相机
+                            </button>
+                        </div>
+                        
+                        <!-- 录制状态指示 -->
+                        <div class="recording-indicator" id="recordingIndicator">
+                            <div class="recording-dot"></div>
+                            <span>正在录制</span>
+                            <span class="recording-time" id="recordingTime">00:00</span>
+                        </div>
+                        
+                        <!-- 相机模式切换 -->
+                        <div class="camera-modes">
+                            <button class="mode-btn active" data-mode="photo">拍照</button>
+                            <button class="mode-btn" data-mode="video">录像</button>
+                        </div>
+                    </div>
+                    
+                    <!-- 相机控制按钮 -->
+                    <div class="camera-controls">
+                        <!-- 闪光灯/滤镜按钮 -->
+                        <button class="filter-btn" onclick="toggleFlash()">
+                            <i class="fas fa-bolt" id="flashIcon"></i>
+                        </button>
+                        
+                        <!-- 拍摄/录制按钮 -->
+                        <button class="capture-btn" id="captureBtn">
+                            <div class="capture-inner" id="captureInner"></div>
+                        </button>
+                        
+                        <!-- 前后摄像头切换 -->
+                        <button class="switch-btn" onclick="switchCamera()">
+                            <i class="fas fa-sync-alt"></i>
+                        </button>
+                    </div>
+                    
+                    <!-- 最近拍摄的照片预览 -->
+                    <div class="recent-media" id="recentMedia">
+                        <div class="media-thumbnail" onclick="openMediaGallery()">
+                            <i class="fas fa-images"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 故事页面 (小红书风格) -->
+            <div class="page" id="stories-page">
+                <div class="page-header">
+                    <h2>动态</h2>
+                    <button class="publish-btn" onclick="openPublishModal()">
+                        <i class="fas fa-plus"></i>
+                    </button>
+                </div>
+                
+                <!-- 发布内容快捷入口 -->
+                <div class="publish-quick">
+                    <div class="my-avatar">
+                        <img src="https://ui-avatars.com/api/?name=我&background=FFFC00&color=000" alt="我">
+                    </div>
+                    <div class="publish-input" onclick="openPublishModal()">
+                        分享你的精彩瞬间...
+                    </div>
+                    <div class="publish-actions">
+                        <button class="quick-photo" onclick="quickPublish('photo')">
+                            <i class="fas fa-camera"></i>
+                        </button>
+                        <button class="quick-video" onclick="quickPublish('video')">
+                            <i class="fas fa-video"></i>
+                        </button>
+                    </div>
+                </div>
+
+                <!-- 动态内容流 -->
+                <div class="stories-feed" id="storiesFeed">
+                    <!-- 动态内容将通过JavaScript动态生成 -->
+                </div>
+            </div>
+
+            <!-- 个人资料页面 -->
+            <div class="page" id="discover-page">
+                <div class="page-header">
+                    <h2>我的资料</h2>
+                    <button class="settings-btn" onclick="openAppSettings()">
+                        <i class="fas fa-cog"></i>
+                    </button>
+                </div>
+                
+                <!-- 个人信息卡片 -->
+                <div class="profile-card">
+                    <div class="profile-header">
+                        <div class="avatar-section">
+                            <div class="profile-avatar" onclick="changeAvatar()">
+                                <img id="profileAvatarImg" src="https://ui-avatars.com/api/?name=我&background=FFFC00&color=000" alt="头像">
+                                <div class="avatar-overlay">
+                                    <i class="fas fa-camera"></i>
+                                </div>
+                            </div>
+                            <input type="file" id="avatarInput" accept="image/*" style="display: none;" onchange="handleAvatarUpload(event)">
+                        </div>
+                        <div class="profile-info">
+                            <div class="name-section">
+                                <h3 id="profileName" onclick="editName()">我</h3>
+                                <i class="fas fa-edit edit-icon" onclick="editName()"></i>
+                            </div>
+                            <p id="profileBio" onclick="editBio()">点击添加个人简介...</p>
+                        </div>
+                    </div>
+                    
+                    <!-- 统计数据 -->
+                    <div class="profile-stats">
+                        <div class="stat-item">
+                            <span class="stat-number" id="postsCount">0</span>
+                            <span class="stat-label">动态</span>
+                        </div>
+                        <div class="stat-item">
+                            <span class="stat-number" id="followersCount">0</span>
+                            <span class="stat-label">粉丝</span>
+                        </div>
+                        <div class="stat-item">
+                            <span class="stat-number" id="followingCount">0</span>
+                            <span class="stat-label">关注</span>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- 个人信息详情 -->
+                <div class="profile-details">
+                    <div class="detail-section">
+                        <h4>联系方式</h4>
+                        <div class="detail-item" onclick="editPhone()">
+                            <i class="fas fa-phone"></i>
+                            <span id="profilePhone">点击添加手机号码</span>
+                            <i class="fas fa-chevron-right"></i>
+                        </div>
+                        <div class="detail-item" onclick="editEmail()">
+                            <i class="fas fa-envelope"></i>
+                            <span id="profileEmail">点击添加邮箱</span>
+                            <i class="fas fa-chevron-right"></i>
+                        </div>
+                    </div>
+                    
+                    <div class="detail-section">
+                        <h4>社交媒体</h4>
+                        <div class="social-links" id="socialLinks">
+                            <button class="add-social-btn" onclick="addSocialMedia()">
+                                <i class="fas fa-plus"></i>
+                                <span>添加社交媒体账号</span>
+                            </button>
+                        </div>
+                    </div>
+                    
+                    <div class="detail-section">
+                        <h4>隐私与安全</h4>
+                        <div class="privacy-item">
+                            <span>私密账户</span>
+                            <label class="switch">
+                                <input type="checkbox" id="privateAccount">
+                                <span class="slider"></span>
+                            </label>
+                        </div>
+                        <div class="privacy-item">
+                            <span>允许通过手机号找到我</span>
+                            <label class="switch">
+                                <input type="checkbox" id="findByPhone" checked>
+                                <span class="slider"></span>
+                            </label>
+                        </div>
+                        <div class="privacy-item">
+                            <span>显示在线状态</span>
+                            <label class="switch">
+                                <input type="checkbox" id="showOnlineStatus" checked>
+                                <span class="slider"></span>
+                            </label>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- 底部导航栏 -->
+        <nav class="bottom-nav">
+            <button class="nav-item active" data-page="map-page">
+                <i class="fas fa-map-marker-alt"></i>
+                <span>地图</span>
+            </button>
+            <button class="nav-item" data-page="chat-page">
+                <i class="fas fa-comment"></i>
+                <span>聊天</span>
+            </button>
+            <button class="nav-item camera-nav" data-page="camera-page">
+                <div class="camera-btn">
+                    <i class="fas fa-camera"></i>
+                </div>
+            </button>
+            <button class="nav-item" data-page="stories-page">
+                <i class="fas fa-compass"></i>
+                <span>发现</span>
+            </button>
+            <button class="nav-item" data-page="discover-page">
+                <i class="fas fa-user"></i>
+                <span>我的</span>
+            </button>
+        </nav>
+    </div>
+
+    <!-- 聊天弹窗 -->
+    <div class="chat-modal" id="chatModal">
+        <div class="chat-header">
+            <button class="back-btn" onclick="closeChatModal()">
+                <i class="fas fa-arrow-left"></i>
+            </button>
+            <div class="chat-user-info">
+                <div class="avatar">
+                    <img id="chatUserAvatar" src="" alt="">
+                </div>
+                <h4 id="chatUserName"></h4>
+            </div>
+            <button class="video-call-btn">
+                <i class="fas fa-video"></i>
+            </button>
+        </div>
+        <div class="chat-messages" id="chatMessages">
+            <!-- 聊天消息将在这里显示 -->
+        </div>
+        <div class="chat-input">
+            <button class="emoji-btn">
+                <i class="fas fa-smile"></i>
+            </button>
+            <input type="text" id="messageInput" placeholder="输入消息...">
+            <button class="send-btn" onclick="sendMessage()">
+                <i class="fas fa-paper-plane"></i>
+            </button>
+        </div>
+    </div>
+
+    <!-- 通知弹窗 -->
+    <div class="notification" id="notification">
+        <span id="notificationText"></span>
+    </div>
+
+    <!-- 拍摄后编辑界面 -->
+    <div class="edit-modal" id="editModal">
+        <div class="edit-container">
+            <div class="edit-header">
+                <button class="cancel-btn" onclick="cancelEdit()">
+                    <i class="fas fa-times"></i>
+                </button>
+                <h3>编辑内容</h3>
+                <button class="next-btn" onclick="proceedToPublish()">
+                    下一步
+                </button>
+            </div>
+            
+            <!-- 媒体预览区域 -->
+            <div class="edit-media-container">
+                <div class="edit-media-preview">
+                    <img id="editPreviewImg" style="display: none;">
+                    <video id="editPreviewVideo" style="display: none;" controls></video>
+                </div>
+                
+                <!-- 文字覆盖层 -->
+                <div class="text-overlay" id="textOverlay">
+                    <div class="text-input-container">
+                        <textarea id="overlayText" placeholder="添加文字..." maxlength="100"></textarea>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- 编辑工具栏 -->
+            <div class="edit-toolbar">
+                <button class="tool-btn" onclick="addText()">
+                    <i class="fas fa-font"></i>
+                    <span>文字</span>
+                </button>
+                <button class="tool-btn" onclick="addEmoji()">
+                    <i class="fas fa-smile"></i>
+                    <span>表情</span>
+                </button>
+                <button class="tool-btn" onclick="adjustFilters()">
+                    <i class="fas fa-magic"></i>
+                    <span>滤镜</span>
+                </button>
+                <button class="tool-btn" onclick="cropMedia()">
+                    <i class="fas fa-crop"></i>
+                    <span>裁剪</span>
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- 发布确认界面 -->
+    <div class="publish-modal" id="publishModal">
+        <div class="publish-container">
+            <div class="publish-header">
+                <button class="back-btn" onclick="backToEdit()">
+                    <i class="fas fa-arrow-left"></i>
+                </button>
+                <h3>发布动态</h3>
+                <button class="publish-confirm-btn" onclick="publishToStories()">
+                    发布
+                </button>
+            </div>
+            
+            <div class="publish-content">
+                <div class="publish-preview">
+                    <img id="publishPreviewImg" style="display: none;">
+                    <video id="publishPreviewVideo" style="display: none;" muted></video>
+                </div>
+                
+                <div class="publish-form">
+                    <textarea id="publishCaption" placeholder="写下你的想法..." maxlength="500"></textarea>
+                    
+                    <div class="publish-options">
+                        <div class="option-item">
+                            <i class="fas fa-map-marker-alt"></i>
+                            <span>添加位置</span>
+                            <button class="add-location-btn" onclick="addLocation()">
+                                <i class="fas fa-plus"></i>
+                            </button>
+                        </div>
+                        
+                        <div class="option-item">
+                            <i class="fas fa-users"></i>
+                            <span>标记朋友</span>
+                            <button class="tag-friends-btn" onclick="tagFriends()">
+                                <i class="fas fa-plus"></i>
+                            </button>
+                        </div>
+                        
+                        <div class="option-item">
+                            <i class="fas fa-eye"></i>
+                            <span>隐私设置</span>
+                            <select id="privacySelect">
+                                <option value="public">公开</option>
+                                <option value="friends">好友可见</option>
+                                <option value="private">仅自己可见</option>
+                            </select>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- 用户个人主页弹窗 -->
+    <div class="user-profile-modal" id="userProfileModal">
+        <div class="user-profile-content">
+            <div class="user-profile-header">
+                <button class="back-btn" onclick="closeUserProfile()">
+                    <i class="fas fa-arrow-left"></i>
+                </button>
+                <h3 id="userProfileTitle">用户资料</h3>
+                <button class="more-btn" onclick="showUserOptions()">
+                    <i class="fas fa-ellipsis-v"></i>
+                </button>
+            </div>
+            
+            <!-- 用户信息 -->
+            <div class="user-info-section">
+                <div class="user-header">
+                    <div class="user-avatar-large">
+                        <img id="userProfileAvatar" src="" alt="用户头像">
+                    </div>
+                    <div class="user-details">
+                        <h2 id="userProfileName">用户名</h2>
+                        <p id="userProfileBio">个人简介</p>
+                        <div class="user-meta">
+                            <span class="user-distance" id="userDistance">距离 500m</span>
+                            <span class="user-online" id="userOnlineStatus">在线</span>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- 用户统计 -->
+                <div class="user-stats">
+                    <div class="stat-item">
+                        <span class="stat-number" id="userPostsCount">0</span>
+                        <span class="stat-label">动态</span>
+                    </div>
+                    <div class="stat-item">
+                        <span class="stat-number" id="userFollowersCount">0</span>
+                        <span class="stat-label">粉丝</span>
+                    </div>
+                    <div class="stat-item">
+                        <span class="stat-number" id="userFollowingCount">0</span>
+                        <span class="stat-label">关注</span>
+                    </div>
+                </div>
+                
+                <!-- 操作按钮 -->
+                <div class="user-actions">
+                    <button class="action-btn follow-btn" id="followBtn" onclick="toggleFollow()">
+                        <i class="fas fa-user-plus"></i>
+                        <span>关注</span>
+                    </button>
+                    <button class="action-btn message-btn" onclick="startChatFromProfile()">
+                        <i class="fas fa-comment"></i>
+                        <span>私信</span>
+                    </button>
+                    <button class="action-btn share-btn" onclick="shareUserProfile()">
+                        <i class="fas fa-share"></i>
+                        <span>分享</span>
+                    </button>
+                </div>
+            </div>
+            
+            <!-- 用户内容 -->
+            <div class="user-content-section">
+                <div class="content-tabs">
+                    <button class="tab-btn active" data-tab="posts" onclick="switchUserTab('posts')">
+                        <i class="fas fa-th-large"></i>
+                        <span>动态</span>
+                    </button>
+                    <button class="tab-btn" data-tab="liked" onclick="switchUserTab('liked')">
+                        <i class="fas fa-heart"></i>
+                        <span>点赞</span>
+                    </button>
+                </div>
+                
+                <div class="tab-content">
+                    <div class="tab-panel active" id="postsTab">
+                        <div class="user-posts" id="userPosts">
+                            <!-- 用户发布的内容将在这里显示 -->
+                        </div>
+                    </div>
+                    <div class="tab-panel" id="likedTab">
+                        <div class="user-liked" id="userLiked">
+                            <!-- 用户点赞的内容将在这里显示 -->
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- 社交媒体选择弹窗 -->
+    <div class="edit-modal" id="socialModal">
+        <div class="edit-content">
+            <div class="edit-header">
+                <h3>添加社交媒体</h3>
+                <button class="cancel-btn" onclick="closeSocialModal()">取消</button>
+            </div>
+            <div class="social-platforms">
+                <div class="platform-item" onclick="addPlatform('weibo')">
+                    <div class="social-icon weibo"><i class="fab fa-weibo"></i></div>
+                    <span>微博</span>
+                </div>
+                <div class="platform-item" onclick="addPlatform('wechat')">
+                    <div class="social-icon wechat"><i class="fab fa-weixin"></i></div>
+                    <span>微信</span>
+                </div>
+                <div class="platform-item" onclick="addPlatform('qq')">
+                    <div class="social-icon qq"><i class="fab fa-qq"></i></div>
+                    <span>QQ</span>
+                </div>
+                <div class="platform-item" onclick="addPlatform('instagram')">
+                    <div class="social-icon instagram"><i class="fab fa-instagram"></i></div>
+                    <span>Instagram</span>
+                </div>
+                <div class="platform-item" onclick="addPlatform('twitter')">
+                    <div class="social-icon twitter"><i class="fab fa-twitter"></i></div>
+                    <span>Twitter</span>
+                </div>
+                <div class="platform-item" onclick="addPlatform('facebook')">
+                    <div class="social-icon facebook"><i class="fab fa-facebook"></i></div>
+                    <span>Facebook</span>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- 应用设置页面弹窗 -->
+    <div class="settings-modal" id="settingsModal">
+        <div class="settings-content">
+            <div class="settings-header">
+                <button class="back-btn" onclick="closeAppSettings()">
+                    <i class="fas fa-arrow-left"></i>
+                </button>
+                <h3>设置</h3>
+                <div></div>
+            </div>
+            
+            <div class="settings-body">
+                <!-- 账号与安全 -->
+                <div class="settings-section">
+                    <div class="settings-item" onclick="showNotification('账号与安全功能开发中...')">
+                        <div class="settings-icon">
+                            <i class="fas fa-user-shield"></i>
+                        </div>
+                        <span>账号与安全</span>
+                        <i class="fas fa-chevron-right"></i>
+                    </div>
+                    <div class="settings-item" onclick="showNotification('通用设置功能开发中...')">
+                        <div class="settings-icon">
+                            <i class="fas fa-cog"></i>
+                        </div>
+                        <span>通用设置</span>
+                        <i class="fas fa-chevron-right"></i>
+                    </div>
+                    <div class="settings-item" onclick="showNotification('通知设置功能开发中...')">
+                        <div class="settings-icon">
+                            <i class="fas fa-bell"></i>
+                        </div>
+                        <span>通知设置</span>
+                        <i class="fas fa-chevron-right"></i>
+                    </div>
+                    <div class="settings-item" onclick="openPrivacySettings()">
+                        <div class="settings-icon">
+                            <i class="fas fa-lock"></i>
+                        </div>
+                        <span>隐私设置</span>
+                        <i class="fas fa-chevron-right"></i>
+                    </div>
+                </div>
+                
+                <!-- 功能设置 -->
+                <div class="settings-section">
+                    <div class="settings-item" onclick="showNotification('存储空间功能开发中...')">
+                        <div class="settings-icon">
+                            <i class="fas fa-hdd"></i>
+                        </div>
+                        <span>存储空间</span>
+                        <i class="fas fa-chevron-right"></i>
+                    </div>
+                    <div class="settings-item" onclick="showNotification('内容偏好调节功能开发中...')">
+                        <div class="settings-icon">
+                            <i class="fas fa-sliders-h"></i>
+                        </div>
+                        <span>内容偏好调节</span>
+                        <i class="fas fa-chevron-right"></i>
+                    </div>
+                    <div class="settings-item" onclick="showNotification('收货地址功能开发中...')">
+                        <div class="settings-icon">
+                            <i class="fas fa-map-marker-alt"></i>
+                        </div>
+                        <span>收货地址</span>
+                        <i class="fas fa-chevron-right"></i>
+                    </div>
+                    <div class="settings-item" onclick="showNotification('添加小组件功能开发中...')">
+                        <div class="settings-icon">
+                            <i class="fas fa-puzzle-piece"></i>
+                        </div>
+                        <span>添加小组件</span>
+                        <i class="fas fa-chevron-right"></i>
+                    </div>
+                    <div class="settings-item" onclick="showNotification('未成年人模式功能开发中...')">
+                        <div class="settings-icon">
+                            <i class="fas fa-child"></i>
+                        </div>
+                        <span>未成年人模式</span>
+                        <span class="settings-status">未开启</span>
+                        <i class="fas fa-chevron-right"></i>
+                    </div>
+                </div>
+                
+                <!-- 帮助与支持 -->
+                <div class="settings-section">
+                    <div class="settings-item" onclick="showNotification('帮助与客服功能开发中...')">
+                        <div class="settings-icon">
+                            <i class="fas fa-headset"></i>
+                        </div>
+                        <span>帮助与客服</span>
+                        <i class="fas fa-chevron-right"></i>
+                    </div>
+                    <div class="settings-item" onclick="showNotification('关于CloneSnap')">
+                        <div class="settings-icon">
+                            <i class="fas fa-info-circle"></i>
+                        </div>
+                        <span>关于CloneSnap</span>
+                        <i class="fas fa-chevron-right"></i>
+                    </div>
+                </div>
+                
+                <!-- 账号操作 -->
+                <div class="settings-actions">
+                    <button class="settings-action-btn secondary" onclick="showNotification('切换账号功能开发中...')">
+                        切换账号
+                    </button>
+                    <button class="settings-action-btn primary" onclick="confirmLogout()">
+                        退出登录
+                    </button>
+                </div>
+                
+                <!-- 协议链接 -->
+                <div class="settings-footer">
+                    <div class="footer-links">
+                        <a href="#" onclick="showNotification('《个人信息收集清单》')">《个人信息收集清单》</a>
+                        <a href="#" onclick="showNotification('《第三方信息共享清单》')">《第三方信息共享清单》</a>
+                    </div>
+                    <div class="footer-links">
+                        <a href="#" onclick="showNotification('《用户服务协议》')">《用户服务协议》</a>
+                        <a href="#" onclick="showNotification('《用户隐私政策》')">《用户隐私政策》</a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="script-leaflet.js"></script>
+</body>
+</html> 
