@@ -1,0 +1,78 @@
+version: '3.8'
+
+services:
+  # LiaoLiao Application
+  app:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: liaoliao-app
+    restart: unless-stopped
+    ports:
+      - "3000:3000"
+    environment:
+      - NODE_ENV=production
+      - PORT=3000
+    env_file:
+      - .env
+    volumes:
+      # Mount logs directory
+      - ./logs:/app/logs
+    networks:
+      - liaoliao-network
+    depends_on:
+      - firebase-emulator
+    healthcheck:
+      test: ["CMD", "node", "-e", "require('http').get('http://localhost:3000/health')"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 40s
+
+  # Firebase Emulator (for local development)
+  firebase-emulator:
+    image: spine3/firebase-emulator:latest
+    container_name: liaoliao-firebase
+    restart: unless-stopped
+    ports:
+      - "4000:4000"   # Emulator UI
+      - "5000:5000"   # Hosting
+      - "5001:5001"   # Functions
+      - "8080:8080"   # Firestore
+      - "9099:9099"   # Auth
+      - "9199:9199"   # Storage
+    volumes:
+      - ./firebase.json:/home/node/firebase.json
+      - ./firestore.rules:/home/node/firestore.rules
+      - ./firestore.indexes.json:/home/node/firestore.indexes.json
+      - firebase-data:/home/node/.firebase
+    networks:
+      - liaoliao-network
+    command: firebase emulators:start --project demo-liaoliao
+
+  # Nginx reverse proxy (optional, for production)
+  nginx:
+    image: nginx:alpine
+    container_name: liaoliao-nginx
+    restart: unless-stopped
+    ports:
+      - "80:80"
+      - "443:443"
+    volumes:
+      - ./nginx/nginx.conf:/etc/nginx/nginx.conf:ro
+      - ./nginx/ssl:/etc/nginx/ssl:ro
+      - ./public:/usr/share/nginx/html:ro
+    networks:
+      - liaoliao-network
+    depends_on:
+      - app
+    profiles:
+      - production
+
+volumes:
+  firebase-data:
+    driver: local
+
+networks:
+  liaoliao-network:
+    driver: bridge
