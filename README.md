@@ -1,173 +1,234 @@
-# CloneSnap - 地图社交应用
+# LiaoLiao (聊聊) - AI媒人マッチングアプリ
 
-一个模仿Snapchat设计风格的地图+社交HTML应用，实现附近用户发现、实时聊天、好友添加等功能。
+<div align="center">
 
-## 🎨 设计特色
+![LiaoLiao Logo](https://img.shields.io/badge/LiaoLiao-AI%20Matchmaker-FF6B9D?style=for-the-badge&logo=heart&logoColor=white)
 
-### 视觉风格
-- **主题色调**: Snapchat经典黄色背景 (`#FFFC00`)
-- **界面设计**: 简洁白色内容区域，圆角卡片布局
-- **导航栏**: 极简黑色底部导航，5个核心功能Tab
-- **交互体验**: 流畅动画过渡，触感反馈
+**AIが仲人となり、会話を通じて最適なパートナーを見つける次世代マッチングアプリ**
 
-### UI组件
-- 🗺️ **地图Tab**: 地理位置社交地图
-- 💬 **聊天Tab**: 私聊消息列表  
-- 📷 **相机Tab**: 中心突出的拍摄按钮
-- 📖 **故事Tab**: 朋友动态和故事
-- 🧭 **发现Tab**: 内容发现和推荐
+[![License](https://img.shields.io/badge/license-MIT-blue.svg)](LICENSE)
+[![Node](https://img.shields.io/badge/node-%3E%3D18.0.0-brightgreen.svg)](https://nodejs.org/)
+[![Firebase](https://img.shields.io/badge/firebase-10.7.1-orange.svg)](https://firebase.google.com/)
+[![OpenAI](https://img.shields.io/badge/OpenAI-GPT--4-412991.svg)](https://openai.com/)
 
-## 🚀 核心功能
-
-### 1. 地图社交
-- **实时位置**: 显示自己和附近用户的位置
-- **用户发现**: 查看附近的人，显示距离信息
-- **快速交互**: 一键加好友或开始聊天
-- **动态更新**: 模拟用户位置实时移动
-
-### 2. 即时聊天
-- **私聊功能**: 与附近用户进行实时对话
-- **消息状态**: 显示在线状态和未读消息数
-- **智能回复**: 模拟对方自动回复
-- **时间显示**: 消息时间戳
-
-### 3. 社交互动
-- **好友系统**: 发送和接受好友请求
-- **状态更新**: 实时在线状态显示
-- **通知提醒**: 新消息和好友请求通知
-
-### 4. 相机功能
-- **拍照模式**: 点击拍照
-- **录像模式**: 长按录制视频
-- **特效预览**: 相机界面预览
-
-### 5. 故事分享
-- **我的故事**: 添加个人故事内容
-- **朋友故事**: 查看朋友分享的故事
-
-### 6. 内容发现
-- **热门推荐**: 浏览热门话题和内容
-- **本地化**: 附近活动和地点推荐
-
-## 🛠️ 技术实现
-
-### 前端技术栈
-- **HTML5**: 语义化结构
-- **CSS3**: 响应式设计，动画效果
-- **Vanilla JavaScript**: 原生JS实现交互
-- **Font Awesome**: 图标库
-- **Google Fonts**: Poppins字体
-
-### 文件结构
-```
-clonesnap/
-├── index.html          # 百度地图版本（需要API密钥）
-├── index-leaflet.html  # Leaflet版本（无需API密钥，可直接运行）
-├── styles.css          # 样式文件
-├── script.js           # 百度地图版本JS
-├── script-leaflet.js   # Leaflet版本JS
-├── map-config.md       # 地图API配置说明
-└── README.md           # 说明文档
-```
-
-### 主要特性
-- 📱 **移动优先**: 响应式设计，适配各种屏幕
-- ⚡ **性能优化**: 纯前端实现，无需服务器
-- 🎭 **模拟数据**: 内置用户和消息数据
-- 🔄 **实时更新**: 动态内容更新
-
-## 🗺️ 地图版本说明
-
-### 两个版本对比
-
-| 特性 | Leaflet版 (推荐) | 百度地图版 |
-|------|------------------|------------|
-| 🆓 **免费使用** | ✅ 完全免费 | ❌ 需要API配额 |
-| 🚀 **即开即用** | ✅ 无需配置 | ❌ 需要申请密钥 |
-| 🌍 **地图数据** | OpenStreetMap | 百度地图 |
-| 📍 **定位精度** | 浏览器GPS | 百度定位服务 |
-| 🎨 **界面风格** | 简洁国际化 | 中国本土化 |
-| 🔧 **配置难度** | 无需配置 | 需要API密钥 |
-
-### 版本选择建议
-- **体验演示**: 推荐使用 `index-leaflet.html`，可以立即运行
-- **生产环境**: 根据目标用户选择对应的地图服务
-- **中国用户**: 百度地图定位更准确，但需要申请API
-- **国际用户**: Leaflet + OpenStreetMap 更适合
-
-## 📋 使用说明
-
-### 快速开始
-1. **立即体验**: 直接打开 `index-leaflet.html`
-2. **百度地图版**: 参考 `map-config.md` 配置API密钥后打开 `index.html`
-
-### 基本操作
-1. **导航切换**: 点击底部5个Tab按钮切换功能
-2. **地图交互**: 
-   - 点击地图上的用户头像查看信息
-   - 使用"加好友"和"聊天"按钮进行互动
-3. **聊天功能**:
-   - 在聊天列表中点击用户进入对话
-   - 输入消息后按回车或点击发送
-   - 点击返回按钮关闭聊天窗口
-
-### 功能体验
-- **地图页面**: 查看附近3个模拟用户(小明、小红、大伟)
-- **聊天页面**: 与用户进行对话，支持实时消息
-- **相机页面**: 模拟拍照和录像功能
-- **故事页面**: 查看和添加故事内容
-- **发现页面**: 浏览推荐内容
-
-## 🌟 核心亮点
-
-### 1. Snapchat风格设计
-- 完美还原Snapchat的视觉设计语言
-- 黄色主题色彩搭配
-- 极简化操作体验
-
-### 2. 地图+社交创新
-- LBS(基于位置服务)社交功能
-- 真实的地理位置社交体验
-- 线上线下结合的社交模式
-
-### 3. 流畅交互体验
-- 平滑的页面切换动画
-- 实时的消息推送通知
-- 触觉反馈(震动)增强体验
-
-### 4. 完整社交生态
-- 好友系统 + 聊天功能
-- 故事分享 + 内容发现
-- 多元化的社交互动方式
-
-## 🔮 扩展可能性
-
-### 短期优化
-- 集成真实地图API (Google Maps/百度地图)
-- 添加WebRTC实时音视频通话
-- 实现真实的用户注册登录系统
-
-### 长期发展
-- AR滤镜和特效功能
-- 实时位置分享
-- 群聊和社区功能
-- 内容创作和分发平台
-
-## 📱 兼容性
-
-- ✅ Chrome 80+
-- ✅ Safari 13+
-- ✅ Firefox 75+
-- ✅ Edge 80+
-- ✅ 移动端浏览器
-
-## 🎯 目标用户
-
-- **Z世代用户**: 追求新鲜、有趣的社交体验
-- **LBS应用用户**: 喜欢基于位置的社交互动
-- **短视频用户**: 习惯快节奏的内容消费
-- **社交爱好者**: 乐于结识新朋友和分享生活
+</div>
 
 ---
 
-**CloneSnap** - 让地理位置成为社交的桥梁 🌍💫 
+## 🌟 プロジェクト概要
+
+LiaoLiao（聊聊 = "話そう"）は、従来のスワイプ型マッチングアプリとは異なり、**AIが仲人として対話を通じて** ユーザーの価値観、性格、理想のパートナー像を深く理解し、最適な相手を推薦する革新的なマッチングアプリです。
+
+### 🎯 主な特徴
+
+1. **🤖 AI仲人との対話**
+   - GPT-4を活用した自然な会話
+   - ユーザーの価値観・性格を深掘り
+   - 過去の恋愛経験から学習
+
+2. **🧠 高度なマッチングアルゴリズム**
+   - OpenAI Embeddingsによるセマンティック分析
+   - Cosine類似度ベースの相性計算
+   - 価値観・性格・地理的要素を総合評価
+
+3. **💬 AI恋愛コーチ**
+   - メッセージ返信のアドバイス
+   - デートプランの提案
+   - 会話のきっかけ提供
+
+4. **🔒 プライバシー重視**
+   - 匿名での初期会話
+   - 相互同意後のみ連絡先開放
+   - GDPR・個人情報保護法準拠
+
+---
+
+## 🚀 クイックスタート
+
+### 前提条件
+
+- Node.js 18.0.0 以上
+- npm 9.0.0 以上
+- Firebaseアカウント
+- OpenAI APIキー
+
+### インストール
+
+```bash
+# リポジトリのクローン
+git clone https://github.com/yourusername/liaoliao-app.git
+cd liaoliao-app
+
+# 依存関係のインストール
+npm install
+
+# 環境変数の設定
+cp .env.example .env
+# .envファイルを編集してAPIキーを設定
+
+# 開発サーバーの起動
+npm run dev
+```
+
+詳細なセットアップ手順は [SETUP.md](./SETUP.md) を参照してください。
+
+---
+
+## 📁 プロジェクト構造
+
+```
+liaoliao-app/
+├── server/                  # バックエンド (Node.js + Express)
+│   ├── config/              # Firebase & OpenAI 設定
+│   ├── middleware/          # 認証・バリデーション
+│   ├── routes/              # API エンドポイント
+│   ├── services/            # ビジネスロジック (AI, マッチング)
+│   └── index.js             # メインサーバー
+├── public/                  # フロントエンド
+│   ├── css/                 # スタイルシート
+│   ├── js/                  # クライアントサイドロジック
+│   └── index.html           # メインHTML
+├── firebase.json            # Firebase 設定
+├── firestore.rules          # Firestore セキュリティルール
+├── ARCHITECTURE.md          # アーキテクチャドキュメント
+├── SETUP.md                 # 詳細セットアップガイド
+└── README.md                # このファイル
+```
+
+---
+
+## 🛠️ 技術スタック
+
+### バックエンド
+- **Node.js** 18+ & Express.js
+- **Firebase**: Firestore, Authentication, Storage
+- **OpenAI API**: GPT-4, Embeddings
+
+### フロントエンド
+- **HTML5 / CSS3 / Vanilla JavaScript**
+- **Firebase SDK**: クライアント認証
+
+### AI・ML
+- **OpenAI GPT-4**: AI仲人・恋愛コーチ
+- **Text Embeddings**: プロフィール分析
+- **Cosine Similarity**: マッチングスコア計算
+
+---
+
+## 📊 主要機能
+
+### 1. AI仲人との対話
+```javascript
+// AI会話の開始
+await api.ai.startMatchmakerConversation();
+
+// 会話の継続
+await api.ai.continueMatchmakerConversation(conversationId, userMessage);
+```
+
+### 2. マッチング検索
+```javascript
+// 最適なマッチを検索
+const matches = await api.matching.findMatches({
+    limit: 10,
+    minScore: 50,
+    maxDistance: 100
+});
+```
+
+### 3. AI恋愛コーチ
+```javascript
+// メッセージ返信のアドバイス
+await api.ai.getMessageAdvice(receivedMessage);
+
+// デートプラン提案
+await api.ai.generateDatePlan(matchedUserId);
+```
+
+---
+
+## 🔐 セキュリティ
+
+- **Firebase Authentication**: ユーザー認証
+- **Firestore Security Rules**: データアクセス制御
+- **Rate Limiting**: API保護
+- **入力サニタイゼーション**: XSS/インジェクション防御
+- **HTTPS強制**: 暗号化通信
+
+---
+
+## 📈 ロードマップ
+
+### フェーズ1: MVP ✅
+- [x] AI仲人との基本会話
+- [x] プロフィール作成・管理
+- [x] マッチングアルゴリズム
+- [x] 基本的なUI/UX
+
+### フェーズ2: 機能拡張
+- [ ] リアルタイムチャット
+- [ ] プッシュ通知
+- [ ] 写真アップロード
+- [ ] AI機能の高度化
+
+### フェーズ3: スケール
+- [ ] ビデオ通話
+- [ ] グループデート
+- [ ] コミュニティ機能
+- [ ] 多言語対応
+
+---
+
+## 💰 収益モデル
+
+### フリーミアム
+- **無料**: 月3回のAI推薦、基本チャット
+- **プレミアム** (¥980/月):
+  - 無制限のAI推薦
+  - AI恋愛コーチング
+  - 優先表示
+
+### 追加課金
+- スーパーライク: ¥200/回
+- ブースト: ¥500/24時間
+
+---
+
+## 🤝 コントリビューション
+
+プルリクエストを歓迎します！
+
+1. このリポジトリをフォーク
+2. フィーチャーブランチを作成 (`git checkout -b feature/AmazingFeature`)
+3. 変更をコミット (`git commit -m 'Add some AmazingFeature'`)
+4. ブランチにプッシュ (`git push origin feature/AmazingFeature`)
+5. プルリクエストを作成
+
+---
+
+## 📝 ドキュメント
+
+- **[ARCHITECTURE.md](./ARCHITECTURE.md)**: システムアーキテクチャの詳細
+- **[SETUP.md](./SETUP.md)**: 詳細なセットアップガイド
+
+---
+
+## 📞 サポート
+
+問題や質問がある場合は、[GitHub Issues](https://github.com/yourusername/liaoliao-app/issues) で報告してください。
+
+---
+
+## 📄 ライセンス
+
+このプロジェクトはMITライセンスの下でライセンスされています。
+
+---
+
+<div align="center">
+
+**LiaoLiao で、AIがあなたの運命の人を見つけます 💝**
+
+Made with ❤️ by the LiaoLiao Team
+
+</div> 

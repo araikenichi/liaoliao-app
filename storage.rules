@@ -1,0 +1,45 @@
+rules_version = '2';
+service firebase.storage {
+  match /b/{bucket}/o {
+
+    // Helper functions
+    function isSignedIn() {
+      return request.auth != null;
+    }
+
+    function isOwner(userId) {
+      return request.auth.uid == userId;
+    }
+
+    function isValidImage() {
+      return request.resource.size < 5 * 1024 * 1024 && // Max 5MB
+             request.resource.contentType.matches('image/.*');
+    }
+
+    // User profile photos
+    match /users/{userId}/photos/{photoId} {
+      // Anyone can read profile photos
+      allow read: if true;
+
+      // Users can upload their own photos
+      allow create: if isSignedIn() &&
+                      isOwner(userId) &&
+                      isValidImage();
+
+      // Users can update/delete their own photos
+      allow update, delete: if isSignedIn() && isOwner(userId);
+    }
+
+    // Temporary uploads (for processing)
+    match /temp/{userId}/{fileName} {
+      allow read, write: if isSignedIn() && isOwner(userId);
+    }
+
+    // Chat attachments (if implemented in future)
+    match /conversations/{conversationId}/attachments/{attachmentId} {
+      allow read: if isSignedIn();
+      allow create: if isSignedIn() &&
+                      request.resource.size < 10 * 1024 * 1024; // Max 10MB
+    }
+  }
+}
