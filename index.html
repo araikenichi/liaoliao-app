@@ -5,12 +5,30 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>CloneSnap - 地图社交</title>
     <link rel="stylesheet" href="styles.css">
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" onerror="console.warn('Font Awesome CDN加载失败 - 图标可能无法正常显示')">
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
-    <!-- 百度地图API -->
-    <script type="text/javascript" src="https://api.map.baidu.com/api?v=3.0&ak=YOUR_BAIDU_MAP_KEY"></script>
+
+    <!--
+        ⚠️ 重要提示：百度地图API需要配置
+
+        当前API密钥为占位符，需要替换为真实密钥。
+
+        快速开始（推荐）：
+        1. 使用 index-leaflet.html（无需API密钥，可直接使用）
+
+        或者配置百度地图API：
+        1. 访问 https://lbsyun.baidu.com/ 注册账号
+        2. 创建应用获取API密钥
+        3. 将下方的 YOUR_BAIDU_MAP_KEY 替换为实际密钥
+        4. 参考 map-config.md 获取详细配置说明
+    -->
+    <script
+        type="text/javascript"
+        src="https://api.map.baidu.com/api?v=3.0&ak=YOUR_BAIDU_MAP_KEY"
+        onerror="console.error('百度地图API加载失败：请检查API密钥配置或使用 index-leaflet.html')">
+    </script>
 </head>
 <body>
     <!-- 主要内容区域 -->

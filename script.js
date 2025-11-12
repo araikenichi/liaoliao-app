@@ -1,4 +1,69 @@
+// ============================================
+// 网络资源加载检查
+// ============================================
+
+// 检查外部资源是否成功加载
+let resourceLoadStatus = {
+    fontAwesome: false,
+    googleFonts: false,
+    baiduMaps: false
+};
+
+// 监听资源加载错误
+window.addEventListener('error', function(e) {
+    if (e.target.tagName === 'LINK' || e.target.tagName === 'SCRIPT') {
+        console.error('资源加载失败:', e.target.href || e.target.src);
+
+        // 检测是哪个资源失败
+        const resourceUrl = e.target.href || e.target.src;
+        if (resourceUrl && resourceUrl.includes('baidu.com')) {
+            resourceLoadStatus.baiduMaps = false;
+            console.warn('百度地图API加载失败 - 建议使用 index-leaflet.html');
+        } else if (resourceUrl && resourceUrl.includes('fontawesome') || resourceUrl.includes('font-awesome')) {
+            resourceLoadStatus.fontAwesome = false;
+            console.warn('Font Awesome加载失败 - 图标可能无法显示');
+        } else if (resourceUrl && resourceUrl.includes('fonts.googleapis.com') || resourceUrl.includes('fonts.gstatic.com')) {
+            resourceLoadStatus.googleFonts = false;
+            console.warn('Google Fonts加载失败 - 字体可能回退到默认');
+        }
+    }
+}, true);
+
+// 在页面加载完成后检查关键资源
+window.addEventListener('load', function() {
+    // 检查Font Awesome是否加载
+    const testIcon = document.createElement('i');
+    testIcon.className = 'fas fa-check';
+    testIcon.style.display = 'none';
+    document.body.appendChild(testIcon);
+    const computedStyle = window.getComputedStyle(testIcon);
+    resourceLoadStatus.fontAwesome = computedStyle.fontFamily.includes('Font Awesome');
+    document.body.removeChild(testIcon);
+
+    // 检查百度地图API
+    resourceLoadStatus.baiduMaps = typeof BMap !== 'undefined';
+
+    // 检查Google Fonts
+    const testText = document.createElement('span');
+    testText.style.fontFamily = 'Poppins, sans-serif';
+    testText.textContent = 'Test';
+    testText.style.display = 'none';
+    document.body.appendChild(testText);
+    const textStyle = window.getComputedStyle(testText);
+    resourceLoadStatus.googleFonts = textStyle.fontFamily.includes('Poppins');
+    document.body.removeChild(testText);
+
+    // 如果关键资源加载失败，显示警告
+    if (!resourceLoadStatus.baiduMaps) {
+        console.warn('⚠️ 百度地图API未加载 - 请使用 index-leaflet.html 或配置API密钥');
+    }
+
+    console.log('资源加载状态:', resourceLoadStatus);
+});
+
+// ============================================
 // 地图相关变量
+// ============================================
 let map;
 let currentUserLocation = null;
 let userMarkers = [];
@@ -226,14 +291,42 @@ function initBaiduMap() {
     // 检查百度地图API是否加载
     if (typeof BMap === 'undefined') {
         console.error('百度地图API未加载，请检查API密钥');
-        showNotification('地图加载失败，请检查网络连接');
+
+        // 显示详细的错误信息和解决方案
+        const mapContainer = document.getElementById('baiduMap');
+        if (mapContainer) {
+            mapContainer.innerHTML = `
+                <div style="display: flex; flex-direction: column; align-items: center; justify-content: center; height: 100%; padding: 20px; text-align: center; background: #f5f5f5;">
+                    <i class="fas fa-exclamation-triangle" style="font-size: 48px; color: #ff6b6b; margin-bottom: 20px;"></i>
+                    <h3 style="color: #333; margin-bottom: 10px;">地图加载失败</h3>
+                    <p style="color: #666; margin-bottom: 20px; line-height: 1.6;">
+                        百度地图API未能成功加载。<br>
+                        可能的原因：API密钥未配置或网络连接问题
+                    </p>
+                    <div style="background: white; padding: 15px; border-radius: 10px; margin-bottom: 20px; max-width: 400px;">
+                        <h4 style="color: #333; margin-bottom: 10px;">💡 解决方案：</h4>
+                        <ol style="text-align: left; color: #666; line-height: 1.8; padding-left: 20px;">
+                            <li>使用 <strong>index-leaflet.html</strong> （无需API密钥）</li>
+                            <li>配置百度地图API密钥（参考 map-config.md）</li>
+                            <li>检查网络连接和防火墙设置</li>
+                            <li>确认浏览器允许加载外部资源</li>
+                        </ol>
+                    </div>
+                    <button onclick="window.location.href='index-leaflet.html'" style="background: #FFFC00; color: #000; border: none; padding: 12px 24px; border-radius: 25px; font-weight: bold; cursor: pointer; font-size: 14px;">
+                        切换到 Leaflet 版本
+                    </button>
+                </div>
+            `;
+        }
+
+        showNotification('地图加载失败 - 请使用 index-leaflet.html 或配置API密钥');
         return;
     }
 
     try {
         // 创建地图实例
         map = new BMap.Map("baiduMap");
-        
+
         // 设置默认中心点（天安门）
         const defaultPoint = new BMap.Point(currentUser.lng, currentUser.lat);
         map.centerAndZoom(defaultPoint, 15);
@@ -268,10 +361,27 @@ function initBaiduMap() {
         addUserMarkers();
 
         console.log('百度地图初始化成功');
-        
+
     } catch (error) {
         console.error('地图初始化失败:', error);
-        showNotification('地图初始化失败');
+        showNotification('地图初始化失败: ' + error.message);
+
+        // 显示错误信息
+        const mapContainer = document.getElementById('baiduMap');
+        if (mapContainer) {
+            mapContainer.innerHTML = `
+                <div style="display: flex; flex-direction: column; align-items: center; justify-content: center; height: 100%; padding: 20px; text-align: center; background: #f5f5f5;">
+                    <i class="fas fa-times-circle" style="font-size: 48px; color: #ff6b6b; margin-bottom: 20px;"></i>
+                    <h3 style="color: #333; margin-bottom: 10px;">地图初始化失败</h3>
+                    <p style="color: #666; margin-bottom: 20px;">
+                        错误信息: ${error.message}
+                    </p>
+                    <button onclick="window.location.reload()" style="background: #FFFC00; color: #000; border: none; padding: 12px 24px; border-radius: 25px; font-weight: bold; cursor: pointer;">
+                        重新加载
+                    </button>
+                </div>
+            `;
+        }
     }
 }
 
