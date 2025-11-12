@@ -25,7 +25,7 @@ if ! command -v http-server &> /dev/null; then
         1)
             echo "正在安装 http-server..."
             npm install -g http-server
-            ;;http://localhost:8080/index-leaflet.html
+            ;;
         2)
             echo "🌐 使用 Python 启动服务器..."
             echo "访问: http://localhost:8080/index-leaflet.html"
@@ -34,7 +34,13 @@ if ! command -v http-server &> /dev/null; then
             ;;
         3)
             echo "📱 直接打开 Leaflet 版本..."
-            open index-leaflet.html
+            if [[ "$OSTYPE" == "darwin"* ]]; then
+                open index-leaflet.html
+            elif [[ "$OSTYPE" == "linux-gnu"* ]]; then
+                xdg-open index-leaflet.html
+            else
+                echo "请手动打开 index-leaflet.html"
+            fi
             exit 0
             ;;
         *)
