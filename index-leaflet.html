@@ -339,10 +339,43 @@
             <button class="emoji-btn">
                 <i class="fas fa-smile"></i>
             </button>
+            <button class="plus-btn" onclick="togglePlusMenu()">
+                <i class="fas fa-plus"></i>
+            </button>
             <input type="text" id="messageInput" placeholder="输入消息...">
             <button class="send-btn" onclick="sendMessage()">
                 <i class="fas fa-paper-plane"></i>
             </button>
+        </div>
+
+        <!-- +号功能菜单 -->
+        <div class="plus-menu" id="plusMenu">
+            <div class="plus-options">
+                <div class="plus-option" onclick="handlePlusOption('photo')">
+                    <div class="option-icon">
+                        <i class="fas fa-image"></i>
+                    </div>
+                    <span>照片</span>
+                </div>
+                <div class="plus-option" onclick="handlePlusOption('camera')">
+                    <div class="option-icon">
+                        <i class="fas fa-camera"></i>
+                    </div>
+                    <span>拍照</span>
+                </div>
+                <div class="plus-option" onclick="handlePlusOption('location')">
+                    <div class="option-icon">
+                        <i class="fas fa-map-marker-alt"></i>
+                    </div>
+                    <span>位置</span>
+                </div>
+                <div class="plus-option" onclick="handlePlusOption('voice')">
+                    <div class="option-icon">
+                        <i class="fas fa-microphone"></i>
+                    </div>
+                    <span>语音输入</span>
+                </div>
+            </div>
         </div>
     </div>
 
