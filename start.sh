@@ -25,7 +25,7 @@ if ! command -v http-server &> /dev/null; then
         1)
             echo "正在安装 http-server..."
             npm install -g http-server
-            ;;http://localhost:8080/index-leaflet.html
+            ;;
         2)
             echo "🌐 使用 Python 启动服务器..."
             echo "访问: http://localhost:8080/index-leaflet.html"
